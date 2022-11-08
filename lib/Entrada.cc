@@ -8,6 +8,10 @@ Entrada::Entrada(Nodo* H): puntero_hijo(H){
     actualizar_rectangulo();
 }
 
+bool Entrada::dentro(int x, int y){
+    return rectangulo[0].dentro(x) && rectangulo[1].dentro(y);
+}
+
 int Entrada::perimetro(){
     return (lado_x() + lado_y())<<1;
 }

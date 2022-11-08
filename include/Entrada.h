@@ -26,6 +26,8 @@ struct Entrada{
     inline Punto centro();
     float distancia_centros(Entrada* K);
 
+    bool dentro(int x, int y);
+
     int lado_x();
     int lado_y();
 

@@ -3,6 +3,7 @@
 
 struct Intervalo{
     int menor, mayor;
+    inline bool dentro(int p);
 };
 
 #endif
