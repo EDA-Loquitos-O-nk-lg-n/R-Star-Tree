@@ -22,7 +22,22 @@ public:
     ~Arbol_R_Estrella();
     // Algorithm InsertData
     void insertar(const vector<Punto>& R); 
+    
+    void eliminar(Punto R);
+    struct Distante{
+        Distante(Entrada* E, Punto P, Nodo *N);
+        ~Distante();
+        Entrada* entrada;
+        double distancia;
+        Nodo* nodo;
+    };
+    vector<Distante> buscar(Punto R, int k);
 protected:
+    friend bool operator<(const Distante &pd1, const Distante &pd2);
+    friend bool operator>(const Distante &pd1, const Distante &pd2);
+    friend bool operator<=(const Distante &pd1, const Distante &pd2);
+    friend bool operator>=(const Distante &pd1, const Distante &pd2);
+    void condensar_cercano(Nodo* L);
     // Algorithm Insert
     void insercion(Entrada* R, bool F=false);
     // Algorithm ChooseSubtree
@@ -39,11 +54,14 @@ protected:
     void reinsertar(Nodo* N);
 
 private:
+    void destruir_recursivo(Nodo* raiz);
     void obtener_altura();
     static int calcular_margen(Intervalo& I, vector<Entrada*>& vE, Entrada& et1, Entrada& et2);
     static pair<int, int> calcular_sobrelapamiento(Nodo *N, int indice);
     Nodo* raiz;
     int altura;
+
+    friend class Interfaz;
 };
 
 #endif

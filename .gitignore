@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
 
+mucho_texto
+generar.cc
 src/main
 .vscode/
 

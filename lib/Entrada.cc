@@ -44,7 +44,7 @@ inline Punto Entrada::centro(){
     return {(rectangulo[0].mayor + rectangulo[0].menor)/2, (rectangulo[1].mayor + rectangulo[1].menor)/2};
 }
 
-Entrada::Entrada(const vector<Punto> &P): puntero_hijo(nullptr){
+Entrada::Entrada(const vector<Punto> &P): objeto(P), puntero_hijo(nullptr){
     actualizar_rectangulo();
 }
 
