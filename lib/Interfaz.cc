@@ -2,7 +2,7 @@
 
 Interfaz::Interfaz(Arbol_R_Estrella* A)
 : arbol_r(A){
-    window.create(sf::VideoMode(1400, 1400), "R-TREE");
+    window.create(sf::VideoMode(1000, 720), "R-TREE");
     if(!font.loadFromFile("../res/font/LemonMilk.otf")){
         cout<<"NO HUBO CARGA DE FUENTE"<<endl;
     }
@@ -10,7 +10,7 @@ Interfaz::Interfaz(Arbol_R_Estrella* A)
 
 Interfaz::Interfaz()
 : arbol_r(new Arbol_R_Estrella){
-    window.create(sf::VideoMode(1400, 1400), "R-TREE");
+    window.create(sf::VideoMode(1000, 720), "R-TREE");
     if(!font.loadFromFile("../res/font/LemonMilk.otf")){
         cout<<"NO HUBO CARGA DE FUENTE"<<endl;
     }
@@ -18,7 +18,7 @@ Interfaz::Interfaz()
 
 void Interfaz::ingresar_coordenada(sf::Event &event)
 {
-    cout << "INSERCION DE COORDENADA:" << endl;
+    // cout << "INSERCION DE COORDENADA:" << endl;
     while (window.isOpen())
     {
         if (!window.pollEvent(event))
@@ -36,7 +36,8 @@ void Interfaz::ingresar_coordenada(sf::Event &event)
 
         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
         pair<int, int> coordenada = {localPosition.x, int(window.getSize().y) - localPosition.y};
-        cout << coordenada.first << '\t' << coordenada.second << endl;
+        // cout << coordenada.first << '\t' << coordenada.second << endl;
+        printf("arbolito->insertar({{%d, %d}});\n", coordenada.first, coordenada.second);
         arbol_r->insertar({{coordenada.first, coordenada.second}});
         return;
     }
@@ -86,7 +87,7 @@ void Interfaz::ingresar_poligono(sf::Event &event)
 
 void Interfaz::eliminar(sf::Event &event)
 {
-    cout << "ELIMINACION" << endl;
+    // cout << "ELIMINACION" << endl;
     while (1)
     {
         if (!window.pollEvent(event))
@@ -102,7 +103,8 @@ void Interfaz::eliminar(sf::Event &event)
         pair<int, int> coordenada = {localPosition.x, int(window.getSize().y) - localPosition.y};
 
 
-        cout << coordenada.first << '\t' << coordenada.second << endl;
+        // cout << coordenada.first << '\t' << coordenada.second << endl;
+        printf("arbolito->eliminar({%d, %d});\n", coordenada.first, coordenada.second);
         arbol_r->eliminar({coordenada.first, coordenada.second});
 
         return;
@@ -169,7 +171,7 @@ void Interfaz::buscar_k_coordenadas(sf::Event& event){
         sf::Vertex linea[2]{ 
             sf::Vector2f(localPosition.x, localPosition.y)
         };
-        linea[0].color = sf::Color::Green;
+        linea[0].color = sf::Color::White;
 
         cout << coordenada.first << '\t' << coordenada.second << endl;
         vector<Arbol_R_Estrella::Distante> k_vecinos = arbol_r->buscar({coordenada.first, coordenada.second}, k);
@@ -184,7 +186,7 @@ void Interfaz::buscar_k_coordenadas(sf::Event& event){
             pm_y/=iEH->objeto.size();
             
             linea[1] = sf::Vector2f(static_cast<int>(pm_x), window.getSize().y - static_cast<int>(pm_y));
-            linea[1].color = sf::Color::Green;
+            linea[1].color = sf::Color::White;
             cout<<linea[1].position.x<<"  "<<linea[1].position.y<<endl;
             window.draw(linea, 2, sf::Lines);
             window.display();

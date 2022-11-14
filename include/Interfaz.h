@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <utility>
 #include <iostream>
+#include <cstdio>
 #include "Arbol_R_Estrella.h"
 
 using namespace std;

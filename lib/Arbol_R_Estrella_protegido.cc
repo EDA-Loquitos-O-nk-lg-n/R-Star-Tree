@@ -1,255 +1,43 @@
 #include"../include/Arbol_R_Estrella.h"
 
-void Arbol_R_Estrella::eliminar(Punto P){
-    // D1
-    Arbol_R_Estrella::Distante cerca = buscar(P, 1)[0];
-    Entrada* E = cerca.entrada;
-    Nodo* L = cerca.nodo;
-
-    // D2
-    for(int i = 0; i<L->entradas.size(); i++){
-        if(L->entradas[i] == E){
-            L->entradas.erase(next(L->entradas.begin(), i));
-            break;
-        }
-    }
-
-    // D3
-    condensar_cercano(L);
-
-    // D4
-    if(raiz->entradas.size() == 1){
-        raiz = raiz->entradas[0]->puntero_hijo;
-        raiz->padre = nullptr;
-    }
-}
-
 void Arbol_R_Estrella::condensar_cercano(Nodo* L){
     // CT1
     Nodo* N = L;
-    vector<Nodo*> Q;
+    vector<Entrada*> Q;
     // CT2
     while(N != raiz){
         Nodo* P = N->padre;
-        int E_N;
+        vector<Entrada*>::iterator iE_N;
         bool eliminado = false;
-        for(int i = 0; i<P->entradas.size(); i++){
-            if(P->entradas[i]->puntero_hijo == N){
-                E_N = i;
-                break;
-            }
-        }
+        iE_N = find_if(P->entradas.begin(), P->entradas.end(),[N](Entrada* e){
+            return e->puntero_hijo == N;
+        });
         // CT3
         if(N->entradas.size() < Constante::m){
-            P->entradas.erase(next(P->entradas.begin(), E_N));
+            Q.push_back(*iE_N);
+            P->entradas.erase(iE_N);
             eliminado = true;
-            Q.push_back(N);
         }
         // CT4
         if(!eliminado){
-            P->entradas[E_N]->actualizar_rectangulo();
+            (*iE_N)->actualizar_rectangulo();
         }
         // CT5
         N = P;
     }
     // CT6
     for(int i = 0; i<Q.size(); i++){
-        // insercion_recursiva(Q[i]);
-    }
-}
-
-Arbol_R_Estrella::Distante::Distante(Entrada* E, Punto P, Nodo *N): entrada(E), nodo(N){
-    if(!N->hoja){
-        if(P.x >= E->rectangulo[0].menor && P.x <= E->rectangulo[0].mayor && P.y >= E->rectangulo[1].menor && P.y <= E->rectangulo[1].mayor)
-            distancia = 0;
-        else if(P.x >= E->rectangulo[0].menor && P.x <= E->rectangulo[0].mayor)
-            distancia = min(abs(P.y-E->rectangulo[1].menor), abs(P.y-E->rectangulo[1].mayor));
-        else if(P.y >= E->rectangulo[1].menor && P.y <= E->rectangulo[1].mayor)
-            distancia = min(abs(P.x-E->rectangulo[0].menor), abs(P.x-E->rectangulo[0].mayor));
-        else{
-            distancia = min(
-                sqrt(pow(P.y-E->rectangulo[1].menor,2)+pow(P.x-E->rectangulo[0].menor,2)), 
-                min(
-                    sqrt(pow(P.y-E->rectangulo[1].mayor,2)+pow(P.x-E->rectangulo[0].menor,2)), 
-                    min(
-                        sqrt(pow(P.y-E->rectangulo[1].menor,2)+pow(P.x-E->rectangulo[0].mayor,2)), 
-                        sqrt(pow(P.y-E->rectangulo[1].mayor,2)+pow(P.x-E->rectangulo[0].mayor,2))))
-                );
+        for(Entrada *e: Q[i]->puntero_hijo->entradas){
+            insercion(e, altura-i, true); 
         }
-    }
-    else{
-        if(E->objeto.size() == 1){
-            distancia = sqrt(pow(P.x-E->objeto[0].x,2)+pow(P.y-E->objeto[0].y,2));
-        }
-        else{
-            double pm_x=0, pm_y=0;
-            for(auto p: E->objeto){
-                pm_x+=p.x;
-                pm_y+=p.y;
-            }
-            pm_x/=E->objeto.size();
-            pm_y/=E->objeto.size();
-            distancia = sqrt(pow(P.x-pm_x,2)+pow(P.y-pm_y,2));
-        }
+        delete Q[i]->puntero_hijo, Q[i];
     }
 }
-
-Arbol_R_Estrella::Distante::~Distante(){}
-
-vector<Arbol_R_Estrella::Distante> Arbol_R_Estrella::buscar(Punto R, int k){
-    priority_queue<Arbol_R_Estrella::Distante, deque<Arbol_R_Estrella::Distante>, greater<Arbol_R_Estrella::Distante>> knn_lista;
-    for(int i = 0; i<raiz->entradas.size(); i++){
-        knn_lista.push({raiz->entradas[i], R, raiz});
-    }
-
-    vector<Arbol_R_Estrella::Distante> resultados;
-    while(resultados.size() < k && !knn_lista.empty()){
-        if(knn_lista.top().nodo->hoja){
-            resultados.push_back(knn_lista.top());
-            knn_lista.pop();
-        }
-        else{
-            Entrada* ET = knn_lista.top().entrada;
-            knn_lista.pop();
-            for(int i = 0; i<ET->puntero_hijo->entradas.size(); i++)
-                knn_lista.push({ET->puntero_hijo->entradas[i], R, ET->puntero_hijo});
-        }
-    }
-    return resultados;
-}
-
-void Arbol_R_Estrella::obtener_altura(){
-    altura = 0;
-    Nodo* N = raiz;
-    while(!N->hoja){
-        N = N->entradas.front()->puntero_hijo;
-        altura++;
-    }
-}
-
-pair<int, int> Arbol_R_Estrella::calcular_sobrelapamiento(Nodo *N, int indice){
-    int area_sobrelapada = 0;
-    int area_distribucion = 0;
-
-    // MBR 1
-    set<int> seg_set_x, seg_set_y;
-
-    for(int i = 0; i<indice; i++){
-        seg_set_x.insert(N->entradas[i]->rectangulo[0].menor);
-        seg_set_y.insert(N->entradas[i]->rectangulo[0].mayor);
-        seg_set_x.insert(N->entradas[i]->rectangulo[1].menor);
-        seg_set_y.insert(N->entradas[i]->rectangulo[1].mayor);
-    }
-
-    vector<int> segmento_x(seg_set_x.begin(), seg_set_x.end()), segmento_y(seg_set_y.begin(), seg_set_y.end());
-    vector<vector<int>> matriz(seg_set_x.size() - 1, vector<int>(seg_set_y.size() - 1, 0));
-    
-    for(int ix = 1; ix<segmento_x.size(); ix++){
-        for(int iy = 1; iy<segmento_y.size(); iy++){
-            for(int ie = 0; ie<indice; ie++){
-                if(N->entradas[ie]->dentro(segmento_x[ix-1], segmento_y[iy-1]) && N->entradas[ie]->dentro(segmento_x[ix], segmento_y[iy])){
-                    matriz[ix-1][iy-1]++;
-                }
-            }
-        }
-    }
-
-    for(int i = 0; i<segmento_x.size()-1; i++){
-        for(int j = 0; j<segmento_y.size()-1; j++){
-            if(matriz[i][j] > 1){
-                area_sobrelapada += (segmento_x[i+1]-segmento_x[i])*(segmento_y[j+1]-segmento_y[j]);
-            }
-        }
-    }
-    area_distribucion += (segmento_x.back() - segmento_x.front())*(segmento_y.back() - segmento_y.front());
-
-    seg_set_x.clear();
-    seg_set_y.clear();
-    
-    // MBR 2
-    for(int i = indice; i<N->entradas.size(); i++){
-        seg_set_x.insert(N->entradas[i]->rectangulo[0].menor);
-        seg_set_x.insert(N->entradas[i]->rectangulo[0].mayor);
-        seg_set_y.insert(N->entradas[i]->rectangulo[1].menor);
-        seg_set_y.insert(N->entradas[i]->rectangulo[1].mayor);
-    }
-    segmento_x = vector<int>(seg_set_x.begin(), seg_set_x.end()); 
-    segmento_y = vector<int>(seg_set_y.begin(), seg_set_y.end());
-    matriz = vector<vector<int>>(seg_set_x.size() - 1, vector<int>(seg_set_y.size() - 1, 0));
-
-    for(int ix = 1; ix<segmento_x.size(); ix++){
-        for(int iy = 1; iy<segmento_y.size(); iy++){
-            for(int ie = indice; ie<N->entradas.size(); ie++){
-                if(N->entradas[ie]->dentro(segmento_x[ix-1], segmento_y[iy-1]) && N->entradas[ie]->dentro(segmento_x[ix], segmento_y[iy])){
-                    matriz[ix-1][iy-1]++;
-                }
-            }
-        }
-    }
-
-    for(int i = 0; i<segmento_x.size()-1; i++){
-        for(int j = 0; j<segmento_y.size()-1; j++){
-            if(matriz[i][j] > 1){
-                area_sobrelapada += (segmento_x[i+1]-segmento_x[i])*(segmento_y[j+1]-segmento_y[j]);
-            }
-        }
-    }
-    area_distribucion += (segmento_x.back() - segmento_x.front())*(segmento_y.back() - segmento_y.front());
-
-    return {area_sobrelapada, area_distribucion};
-}
-
-int Arbol_R_Estrella::calcular_margen(Intervalo& I, vector<Entrada*>& vE, Entrada& et1, Entrada& et2){
-    for(int k=I.menor; k<=I.mayor; k++){
-       et1.puntero_hijo->entradas = vector<Entrada*>(vE.begin(), next(vE.begin(), (Constante::m-1)+k)); 
-       et2.puntero_hijo->entradas = vector<Entrada*>(next(vE.begin(), (Constante::m-1)+k), vE.end()); 
-       et1.actualizar_rectangulo();
-       et2.actualizar_rectangulo();
-    }
-    return et1.perimetro() + et2.perimetro();
-}
-
-Arbol_R_Estrella::Arbol_R_Estrella(): raiz(new Nodo{true, nullptr}){
-    obtener_altura();
-}
-
-void Arbol_R_Estrella::destruir_recursivo(Nodo* N){
-    if(N != nullptr && !N->hoja){
-        for(Entrada* e: N->entradas){
-            destruir_recursivo(e->puntero_hijo);
-        }
-        delete N;
-    }
-}
-
-bool operator<(const Arbol_R_Estrella::Distante &pd1, const Arbol_R_Estrella::Distante &pd2){
-    return pd1.distancia < pd2.distancia;
-}
-bool operator>(const Arbol_R_Estrella::Distante &pd1, const Arbol_R_Estrella::Distante &pd2){
-    return pd1.distancia>pd2.distancia;
-}
-bool operator<=(const Arbol_R_Estrella::Distante &pd1, const Arbol_R_Estrella::Distante &pd2){
-    return pd1.distancia<=pd2.distancia;
-}
-bool operator>=(const Arbol_R_Estrella::Distante &pd1, const Arbol_R_Estrella::Distante &pd2){
-    return pd1.distancia>=pd2.distancia;
-}
-
-Arbol_R_Estrella::~Arbol_R_Estrella(){
-    destruir_recursivo(raiz);
-}
-
-// Algorithm InsertData
-void Arbol_R_Estrella::insertar(const vector<Punto>& R){
-    Entrada* Entrada_R = new Entrada{R};
-    insercion(Entrada_R, true);
-    obtener_altura();
-} 
 
 // Algorithm Insert
-void Arbol_R_Estrella::insercion(Entrada* R, bool F){
+void Arbol_R_Estrella::insercion(Entrada* R, int Nivel, bool F){
     // I1
-    Nodo* Apropiado{escoger_subarbol(F, R)};
+    Nodo* Apropiado{escoger_subarbol(Nivel, R)};
     // I2, I3, I4
     Nodo* partido;
     while(Apropiado != nullptr){
@@ -261,7 +49,7 @@ void Arbol_R_Estrella::insercion(Entrada* R, bool F){
         }
 
         if(Apropiado->entradas.size() > Constante::M){
-            partido = tratar_desborde(Apropiado, F);
+            partido = tratar_desborde(Apropiado, Nivel, F);
             if(partido != nullptr && Apropiado == raiz){
                 raiz = new Nodo{false, nullptr, {new Entrada{raiz}, new Entrada{partido}}};
                 raiz->entradas[0]->puntero_hijo->padre = raiz;
@@ -281,6 +69,7 @@ void Arbol_R_Estrella::insercion(Entrada* R, bool F){
         }
         
         Apropiado = Apropiado->padre;
+        Nivel--;
     }
 }
 
@@ -290,7 +79,7 @@ Nodo* Arbol_R_Estrella::escoger_subarbol(int Nivel,  Entrada* ER){
     Nodo* N{raiz};
 
     // CS2
-    while(!N->hoja){
+    while(Nivel != 0){
         // Si las entradas son hojas
         if(N->entradas.front()->puntero_hijo == nullptr){
             // {puntero_entrada, incremento superposicion, area_ampliada, area}
@@ -341,6 +130,7 @@ Nodo* Arbol_R_Estrella::escoger_subarbol(int Nivel,  Entrada* ER){
             }
             N = get<0>(escoger)->puntero_hijo;
         }
+        Nivel--;
     }
 
     return N;
@@ -436,10 +226,10 @@ pair<int, bool> Arbol_R_Estrella::escoger_indice_division(Nodo* N, int eje){
 }
 
 // Algorithm OverflowTreatment
-Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, bool F){
+Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, int Nivel, bool F){
     Nodo* partir = nullptr;
     if(F && N != raiz){
-        reinsertar(N);
+        reinsertar(N, Nivel);
     }
     else{
         partir = dividir(N);
@@ -448,7 +238,7 @@ Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, bool F){
 }
 
 // Algorithm ReInsert
-void Arbol_R_Estrella::reinsertar(Nodo* N){
+void Arbol_R_Estrella::reinsertar(Nodo* N, int Nivel){
     // RI1
     Entrada* e = nullptr;
     for(Entrada* et: N->padre->entradas){
@@ -475,7 +265,7 @@ void Arbol_R_Estrella::reinsertar(Nodo* N){
 
     // RI4
     while(!distancias.empty()){
-        insercion(distancias.top().second);
+        insercion(distancias.top().second, Nivel, false);
         distancias.pop();
     }
 }

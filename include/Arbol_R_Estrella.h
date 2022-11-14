@@ -6,6 +6,7 @@
 #include"Entrada.h"
 #include"Constante.h"
 #include<functional>
+#include<iostream>
 #include<vector>
 #include<queue>
 #include<tuple>
@@ -39,7 +40,7 @@ protected:
     friend bool operator>=(const Distante &pd1, const Distante &pd2);
     void condensar_cercano(Nodo* L);
     // Algorithm Insert
-    void insercion(Entrada* R, bool F=false);
+    void insercion(Entrada* R, int Nivel, bool F);
     // Algorithm ChooseSubtree
     Nodo* escoger_subarbol(int Nivel, Entrada* ER); 
     // Alogrithm Split
@@ -49,11 +50,12 @@ protected:
     // Algorithm ChooseSplitIndex
     pair<int,bool> escoger_indice_division(Nodo* N, int eje); 
     // Algorithm OverflowTreatment
-    Nodo* tratar_desborde(Nodo* N, bool F=false);
+    Nodo* tratar_desborde(Nodo* N, int Nivel, bool F);
     // Algorithm ReInsert
-    void reinsertar(Nodo* N);
+    void reinsertar(Nodo* N, int Nivel);
 
 private:
+    void imprimir_cantidad_nodos();
     void destruir_recursivo(Nodo* raiz);
     void obtener_altura();
     static int calcular_margen(Intervalo& I, vector<Entrada*>& vE, Entrada& et1, Entrada& et2);

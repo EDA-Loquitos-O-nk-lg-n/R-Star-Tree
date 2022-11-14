@@ -1,6 +1,6 @@
 # Prerequisites
 *.d
-
+src/debug.h
 mucho_texto
 generar.cc
 src/main
