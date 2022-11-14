@@ -109,15 +109,37 @@ void Arbol_R_Estrella::insertar(const vector<Punto>& R){
 void Arbol_R_Estrella::insercion(Entrada* R, bool F){
     // I1
     Nodo* Apropiado{escoger_subarbol(F, R)};
+    // I2, I3, I4
+    Nodo* partido;
+    while(Apropiado != nullptr){
+        if(R == nullptr){
+            Apropiado->entradas.push_back(R);
+        }
 
-    // I2
-    Apropiado->entradas.push_back(R);
-    if(Apropiado->entradas.size() >= Constante::M){
-        tratar_desborde(Apropiado, F);
+        if(Apropiado->entradas.size() >= Constante::M){
+            partido = tratar_desborde(Apropiado, F);
+            if(partido != nullptr && Apropiado == raiz){
+                raiz = new Nodo{false, nullptr, {new Entrada{raiz}, new Entrada{partido}}};
+                return;
+            }
+
+            R = (partido != nullptr?new Entrada{partido}:nullptr);
+        }
+        else{
+            R = nullptr;
+        }
+
+        if(Apropiado != raiz){
+            for(Entrada* e: Apropiado->padre->entradas){
+                if(e->puntero_hijo == Apropiado){
+                    e->actualizar_rectangulo();
+                    break;
+                }
+            }
+        }
+        
+        Apropiado = Apropiado->padre;
     }
-
-    // I3
-
 }
 
 // Algorithm ChooseSubtree
@@ -185,17 +207,28 @@ Nodo* Arbol_R_Estrella::escoger_subarbol(int Nivel,  Entrada* ER){
 // Alogrithm Split
 Nodo* Arbol_R_Estrella::dividir(Nodo* N){
 
+    //Hardcodear las funciones de comparacion [eje][menor/mmayor]
+    function<bool(Entrada*, Entrada*)> comparadores[2][2]{
+        {&comparar_rectangulo_menor_X, &comparar_rectangulo_mayor_X},
+        {&comparar_rectangulo_menor_Y, &comparar_rectangulo_mayor_Y}
+    };
+
     // S1
     int eje{escoger_eje_division(N)};
 
     // S2
-    int indice_k{escoger_indice_division(N, eje)};
+    pair<int, bool> indice_k_orden{escoger_indice_division(N, eje)};
+    sort(N->entradas.begin(), N->entradas.end(),  comparadores[eje][indice_k_orden.second]);
 
     // S3
     Nodo* N_partido = new Nodo{N->hoja};
-    N->entradas.resize(Constante::m - 1 + indice_k);
-    N_partido->entradas = vector<Entrada*>(next(N->entradas.begin(), Constante::m - 1 + indice_k), N->entradas.end());
-
+    N_partido->entradas = vector<Entrada*>(next(N->entradas.begin(), Constante::m - 1 + indice_k_orden.first), N->entradas.end());
+    N->entradas.resize(Constante::m - 1 + indice_k_orden.first);
+    if(!N_partido->hoja){
+        for(Entrada* e: N_partido->entradas){
+            e->puntero_hijo->padre = N_partido;
+        }
+    }
     return N_partido;
 }
 
@@ -227,38 +260,49 @@ int Arbol_R_Estrella::escoger_eje_division(Nodo* N){
     return S[0]<S[1];
 }
 
-// Algorithm ChooseSplitIndex
-int Arbol_R_Estrella::escoger_indice_division(Nodo* N, int eje){
+// Algorithm ChooseSplitIndex (k, menor/mayor)
+pair<int, bool> Arbol_R_Estrella::escoger_indice_division(Nodo* N, int eje){
     Intervalo I{1, Constante::M - 2*Constante::m + 2};
-    // indice-k, sobrelapar, area
-    tuple<int, int, int> criterio{0,numeric_limits<int>::max(),numeric_limits<int>::max()};
+    // indice-k, sobrelapar, area, orden por menor/mayor, 
+    tuple<int, int, int, bool> criterio{0,numeric_limits<int>::max(),numeric_limits<int>::max(), false};
+    function<bool(Entrada*, Entrada*)> comparadores[2];
+    comparadores[0] = (eje? &comparar_rectangulo_menor_Y: &comparar_rectangulo_menor_X);
+    comparadores[1] = (eje? &comparar_rectangulo_mayor_Y: &comparar_rectangulo_mayor_X);
+    // void* funcion_menor = (eje?); 
 
-    for(int k = I.menor; k<= I.mayor; k++){
-        pair<int, int> evaluador = calcular_sobrelapamiento(N, Constante::m - 1 + k);
-        if(evaluador.first < get<1>(criterio)){
-            get<0>(criterio) = k;
-            get<1>(criterio) = evaluador.first;
-            get<2>(criterio) = evaluador.second;
-        }
-        else if(evaluador.first == get<1>(criterio) && evaluador.second < get<2>(criterio)){
-            get<0>(criterio) = k;
-            get<1>(criterio) = evaluador.first;
-            get<2>(criterio) = evaluador.second;
+    vector<Entrada*> entradas = N->entradas;
+    for(int b = 0; b<2; b++){
+        sort(entradas.begin(), entradas.end(), comparadores[b]);
+        for(int k = I.menor; k<= I.mayor; k++){
+            pair<int, int> evaluador = calcular_sobrelapamiento(N, Constante::m - 1 + k);
+            if(evaluador.first < get<1>(criterio)){
+                get<0>(criterio) = k;
+                get<1>(criterio) = evaluador.first;
+                get<2>(criterio) = evaluador.second;
+                get<3>(criterio) = b;
+            }
+            else if(evaluador.first == get<1>(criterio) && evaluador.second < get<2>(criterio)){
+                get<0>(criterio) = k;
+                get<1>(criterio) = evaluador.first;
+                get<2>(criterio) = evaluador.second;
+                get<3>(criterio) = b;
+            }
         }
     }
 
-    return get<0>(criterio);
+    return {get<0>(criterio), get<3>(criterio)};
 }
 
 // Algorithm OverflowTreatment
 Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, bool F){
+    Nodo* partir = nullptr;
     if(F && N != raiz){
         reinsertar(N);
     }
     else{
-        dividir(N);
+        partir = dividir(N);
     }
-    return nullptr;
+    return partir;
 }
 
 // Algorithm ReInsert

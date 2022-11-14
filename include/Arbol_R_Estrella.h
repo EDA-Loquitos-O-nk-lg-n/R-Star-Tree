@@ -5,6 +5,7 @@
 #include"Punto.h"
 #include"Entrada.h"
 #include"Constante.h"
+#include<functional>
 #include<vector>
 #include<queue>
 #include<tuple>
@@ -31,7 +32,7 @@ protected:
     // Algorithm ChooseSpliAxis
     int escoger_eje_division(Nodo* N); 
     // Algorithm ChooseSplitIndex
-    int escoger_indice_division(Nodo* N, int eje); 
+    pair<int,bool> escoger_indice_division(Nodo* N, int eje); 
     // Algorithm OverflowTreatment
     Nodo* tratar_desborde(Nodo* N, bool F=false);
     // Algorithm ReInsert
