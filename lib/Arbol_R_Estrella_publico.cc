@@ -30,7 +30,7 @@ void Arbol_R_Estrella::eliminar(Punto P){
 
     obtener_altura();
 
-    imprimir_cantidad_nodos();
+    // imprimir_cantidad_nodos();
 }
 
 vector<Arbol_R_Estrella::Distante> Arbol_R_Estrella::buscar(Punto R, int k){
@@ -69,6 +69,6 @@ void Arbol_R_Estrella::insertar(const vector<Punto>& R){
     insercion(Entrada_R, altura, true);
     obtener_altura();
 
-    imprimir_cantidad_nodos();
+    // imprimir_cantidad_nodos();
 } 
 

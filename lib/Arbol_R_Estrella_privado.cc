@@ -109,10 +109,16 @@ int Arbol_R_Estrella::calcular_margen(Intervalo& I, vector<Entrada*>& vE, Entrad
 }
 
 void Arbol_R_Estrella::destruir_recursivo(Nodo* N){
-    if(N != nullptr && !N->hoja){
+    if(!N->hoja){
         for(Entrada* e: N->entradas){
             destruir_recursivo(e->puntero_hijo);
+            delete e;
         }
-        delete N;
     }
+    else{
+        for(Entrada* e: N->entradas){
+            delete e;
+        }
+    }
+    delete N;
 }

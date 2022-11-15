@@ -6,7 +6,7 @@ int main(int argc, char const *argv[])
 {
     Arbol_R_Estrella* arbolito = new Arbol_R_Estrella;
 
-    debug(arbolito);
+    // debug(arbolito);
 
     Interfaz aplicacion(arbolito);
     aplicacion.ejecutar();

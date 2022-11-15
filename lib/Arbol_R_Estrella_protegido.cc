@@ -43,7 +43,8 @@ void Arbol_R_Estrella::insercion(Entrada* R, int Nivel, bool F){
     while(Apropiado != nullptr){
         if(R != nullptr){
             Apropiado->entradas.push_back(R);
-            if(!Apropiado->hoja){
+            // if(!Apropiado->hoja){
+            if(R->puntero_hijo != nullptr){
                 R->puntero_hijo->padre = Apropiado;
             }
         }
@@ -151,6 +152,8 @@ Nodo* Arbol_R_Estrella::dividir(Nodo* N){
     // S2
     pair<int, bool> indice_k_orden{escoger_indice_division(N, eje)};
     sort(N->entradas.begin(), N->entradas.end(),  comparadores[eje][indice_k_orden.second]);
+
+    // cout<<eje<<'\t'<<indice_k_orden.first<<'\t'<<indice_k_orden.second<<'\n';
 
     // S3
     Nodo* N_partido = new Nodo{N->hoja};
