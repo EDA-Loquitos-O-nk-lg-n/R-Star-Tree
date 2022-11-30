@@ -48,6 +48,35 @@ void verificarPadres(Arbol_R_Estrella *a){
     revisar(a->raiz);
 }
 
+static void sobrelapamiento(){
+    ofstream of("Solapamiento.csv", ofstream::out);
+    of<<"Total,Hoja\n";
+    // for(int t = 0; t<1; t++){
+    for(int t = 0; t<100; t++){
+        Arbol_R_Estrella* a = new Arbol_R_Estrella;
+
+        for(int b = 0; b<5000; b++){
+            a->insertar(generar_poligono());
+        }
+
+        of<<fixed<<a->obtener_sobrelapado_total()<<',';
+
+        for(int h =a->retornar_altura(); h>=1; h--){
+            of<<fixed<<a->obtener_sobrelapado(h);
+            if(h >1 )
+                of<<',';
+        }
+
+
+        of<<'\n';
+
+        cout<<t+1<<endl;
+
+        delete a;
+    }
+    of.close();
+}
+
 static void T_I(){
     ofstream of("T_I.csv", ofstream::out);
     for(int i = 0; i<500; i++){
@@ -207,5 +236,5 @@ static void T_K(){
 }
 
 int main(){
-    T_B();
+    sobrelapamiento();
 }

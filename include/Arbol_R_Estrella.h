@@ -35,6 +35,9 @@ public:
     };
     vector<Distante> buscar(Punto R, int k);
     bool buscar_exacto(const vector<Punto>& Ps);
+    int retornar_altura();
+    double obtener_sobrelapado(int Nivel);
+    double obtener_sobrelapado_total();
 protected:
     friend bool operator<(const Distante &pd1, const Distante &pd2);
     friend bool operator>(const Distante &pd1, const Distante &pd2);
