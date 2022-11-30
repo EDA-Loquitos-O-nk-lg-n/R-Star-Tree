@@ -1,5 +1,43 @@
 #include"../include/Arbol_R_Estrella.h"
 
+bool Arbol_R_Estrella::buscar_exacto(const vector<Punto>& Ps){
+    Entrada verificadora{Ps};
+
+    queue<Nodo*> cola;
+    cola.push(raiz);
+    while(!cola.empty()){
+        if(cola.front()->hoja){
+            for(Entrada* e: cola.front()->entradas){
+                if(Ps.size() != e->objeto.size()){
+                    continue;
+                }
+
+                bool iguales = true;
+                for (int i_punto = 0; i_punto < Ps.size(); i_punto++){
+                    if(Ps[i_punto].x != e->objeto[i_punto].x || Ps[i_punto].y != e->objeto[i_punto].y){
+                        iguales = false;
+                        break;
+                    }
+                }
+                if(iguales){
+                    return true;
+                }                
+            }
+        }
+        else{
+            for(Entrada* e: cola.front()->entradas){
+                if(!e->dentro(verificadora.rectangulo[0].menor, verificadora.rectangulo[1].menor) 
+                    || !e->dentro(verificadora.rectangulo[0].mayor, verificadora.rectangulo[1].mayor)){
+                        continue;
+                    }
+                cola.push(e->puntero_hijo);
+            }
+        }
+        cola.pop();
+    }
+    return false;
+}
+
 void Arbol_R_Estrella::eliminar(Punto P){
     if(raiz->entradas.size() == 0){
         return;
@@ -29,7 +67,7 @@ void Arbol_R_Estrella::eliminar(Punto P){
     }
 
     obtener_altura();
-
+    objetos--;
     // imprimir_cantidad_nodos();
 }
 
@@ -68,7 +106,7 @@ void Arbol_R_Estrella::insertar(const vector<Punto>& R){
     Entrada* Entrada_R = new Entrada{R};
     insercion(Entrada_R, altura, true);
     obtener_altura();
-
+    objetos++;
     // imprimir_cantidad_nodos();
 } 
 

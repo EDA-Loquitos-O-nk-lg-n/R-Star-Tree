@@ -6,6 +6,7 @@
 #include"Entrada.h"
 #include"Constante.h"
 #include<functional>
+#include<cmath>
 #include<iostream>
 #include<vector>
 #include<queue>
@@ -33,6 +34,7 @@ public:
         Nodo* nodo;
     };
     vector<Distante> buscar(Punto R, int k);
+    bool buscar_exacto(const vector<Punto>& Ps);
 protected:
     friend bool operator<(const Distante &pd1, const Distante &pd2);
     friend bool operator>(const Distante &pd1, const Distante &pd2);
@@ -50,7 +52,7 @@ protected:
     // Algorithm ChooseSplitIndex
     pair<int,bool> escoger_indice_division(Nodo* N, int eje); 
     // Algorithm OverflowTreatment
-    Nodo* tratar_desborde(Nodo* N, int Nivel, bool F);
+    Nodo* tratar_desborde(Nodo* N, int Nivel, bool Primera_Llamada);
     // Algorithm ReInsert
     void reinsertar(Nodo* N, int Nivel);
 
@@ -62,8 +64,10 @@ private:
     static pair<int, int> calcular_sobrelapamiento(Nodo *N, int indice);
     Nodo* raiz;
     int altura;
+    int objetos;
 
     friend class Interfaz;
+    friend void verificarPadres(Arbol_R_Estrella* a);
 };
 
 #endif

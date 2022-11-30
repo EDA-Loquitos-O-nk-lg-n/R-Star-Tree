@@ -35,7 +35,7 @@ void Arbol_R_Estrella::condensar_cercano(Nodo* L){
 }
 
 // Algorithm Insert
-void Arbol_R_Estrella::insercion(Entrada* R, int Nivel, bool F){
+void Arbol_R_Estrella::insercion(Entrada* R, int Nivel, bool Primera_Llamada){
     // I1
     Nodo* Apropiado{escoger_subarbol(Nivel, R)};
     // I2, I3, I4
@@ -50,7 +50,10 @@ void Arbol_R_Estrella::insercion(Entrada* R, int Nivel, bool F){
         }
 
         if(Apropiado->entradas.size() > Constante::M){
-            partido = tratar_desborde(Apropiado, Nivel, F);
+            partido = tratar_desborde(Apropiado, Nivel, Primera_Llamada);
+            if( Primera_Llamada == true && Apropiado != raiz){
+                return;
+            }
             if(partido != nullptr && Apropiado == raiz){
                 raiz = new Nodo{false, nullptr, {new Entrada{raiz}, new Entrada{partido}}};
                 raiz->entradas[0]->puntero_hijo->padre = raiz;
@@ -58,7 +61,12 @@ void Arbol_R_Estrella::insercion(Entrada* R, int Nivel, bool F){
                 return;
             }
 
-            R = (partido != nullptr?new Entrada{partido}:nullptr);
+            if(partido != nullptr){
+                R = new Entrada{partido};
+            }
+            else{
+                R = nullptr;
+            }
         }
         else{
             R = nullptr;
@@ -156,7 +164,7 @@ Nodo* Arbol_R_Estrella::dividir(Nodo* N){
     // cout<<eje<<'\t'<<indice_k_orden.first<<'\t'<<indice_k_orden.second<<'\n';
 
     // S3
-    Nodo* N_partido = new Nodo{N->hoja};
+    Nodo* N_partido = new Nodo{N->hoja, N->padre}; // AGREGUE PADRE
     N_partido->entradas = vector<Entrada*>(next(N->entradas.begin(), Constante::m - 1 + indice_k_orden.first), N->entradas.end());
     N->entradas.resize(Constante::m - 1 + indice_k_orden.first);
     if(!N_partido->hoja){
@@ -229,9 +237,9 @@ pair<int, bool> Arbol_R_Estrella::escoger_indice_division(Nodo* N, int eje){
 }
 
 // Algorithm OverflowTreatment
-Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, int Nivel, bool F){
+Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, int Nivel, bool Primera_Llamada){
     Nodo* partir = nullptr;
-    if(F && N != raiz){
+    if(Primera_Llamada && N != raiz){
         reinsertar(N, Nivel);
     }
     else{
@@ -242,7 +250,6 @@ Nodo* Arbol_R_Estrella::tratar_desborde(Nodo* N, int Nivel, bool F){
 
 // Algorithm ReInsert
 void Arbol_R_Estrella::reinsertar(Nodo* N, int Nivel){
-    // RI1
     Entrada* e = nullptr;
     for(Entrada* et: N->padre->entradas){
         if(et->puntero_hijo == N){
@@ -251,6 +258,7 @@ void Arbol_R_Estrella::reinsertar(Nodo* N, int Nivel){
         }
     }
 
+    // RI1
     // RI2
     priority_queue<pair<float, Entrada*>, deque<pair<float, Entrada*>>, greater<pair<float, Entrada*>>> distancias;
     for(Entrada* et: N->entradas){
@@ -259,16 +267,27 @@ void Arbol_R_Estrella::reinsertar(Nodo* N, int Nivel){
     N->entradas.clear();
 
     // RI3
-    int conservar = distancias.size() - (distancias.size() * 3) / 10;
+    // int conservar = distancias.size() - (distancias.size() * 3) / 10;
+    float conservar = ceil(distancias.size() * 0.7f);
     for(int i = 0; i<conservar; i++){
         N->entradas.push_back(distancias.top().second);
         distancias.pop();
     }
-    e->actualizar_rectangulo();
+    // Reajustar rectangulo desde el nodo hasta la entrada de la raiz
+    for(Nodo* nt = N; nt != raiz; nt = nt->padre){
+        for(Entrada* et: nt->padre->entradas){
+            if(et->puntero_hijo == nt){
+                et->actualizar_rectangulo();
+                break;
+            }
+        }
+    }
 
     // RI4
+    int altura_actual = altura;
     while(!distancias.empty()){
-        insercion(distancias.top().second, Nivel, false);
+        insercion(distancias.top().second, Nivel + (altura - altura_actual), false);
+        obtener_altura();
         distancias.pop();
     }
 }
