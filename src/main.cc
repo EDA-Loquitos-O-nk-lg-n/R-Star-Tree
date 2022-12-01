@@ -4,13 +4,14 @@
 
 int main(int argc, char const *argv[])
 {
-    Arbol_R_Estrella* arbolito = new Arbol_R_Estrella;
+    // Arbol_R_Estrella* arbolito = new Arbol_R_Estrella;
 
     // debug(arbolito);
 
-    Interfaz aplicacion(arbolito);
+    // Interfaz aplicacion(arbolito);
+    Interfaz aplicacion;
     aplicacion.ejecutar();
 
-    delete arbolito;    
+    // delete arbolito;    
     return 0;
 }

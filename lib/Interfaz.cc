@@ -10,7 +10,7 @@ Interfaz::Interfaz(Arbol_R_Estrella* A)
 
 Interfaz::Interfaz()
 : arbol_r(new Arbol_R_Estrella){
-    window.create(sf::VideoMode(1000, 720), "R-TREE");
+    window.create(sf::VideoMode(Constante::N, Constante::N), "R-TREE");
     if(!font.loadFromFile("../res/font/LemonMilk.otf")){
         cout<<"NO HUBO CARGA DE FUENTE"<<endl;
     }
