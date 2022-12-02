@@ -4,7 +4,6 @@ src/debug.h
 mucho_texto
 generar.cc
 src/main
-.vscode/
 /test/*.csv
 /test/test
 

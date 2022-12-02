@@ -278,18 +278,22 @@ void Interfaz::ejecutar()
     }
 }
 
-// FUNCION DEPRECADA
 void Interfaz::imprimir_arbol_r(){
     int espacio{10};
+    // Dibujamos empezando en la raiz
     imprimir_arbol_r_recursivo(arbol_r->raiz, espacio, 30);
 }
 
 // FUNCION DEPRECADA
 void Interfaz::imprimir_arbol_r_recursivo(Nodo* nodo, int &espacio, int color){
+    // Si es un nodo hoja
     if(nodo->hoja){
+        // por todas las entradas
         for(auto i: nodo->entradas){
             Entrada* eh = i;
+            // si es solo un punto
             if(eh->objeto.size() == 1){
+                // Dibujamos un circulo en la posición del Punto
                 sf::CircleShape coordenada;
                 coordenada.setRadius(4);
                 coordenada.setFillColor(sf::Color::Red);
@@ -306,8 +310,10 @@ void Interfaz::imprimir_arbol_r_recursivo(Nodo* nodo, int &espacio, int color){
                 window.draw(text);
                 espacio += 13; */
             }
+            // Si es un poligono
             else
             {
+                // Agregamos las coordenadas a la figura compleja
                 sf::ConvexShape convex;
                 string polygon_coords;
                 convex.setPointCount(eh->objeto.size());
@@ -331,19 +337,25 @@ void Interfaz::imprimir_arbol_r_recursivo(Nodo* nodo, int &espacio, int color){
             }
         }
     }
+    // SI es un nodo interno
     else
     {
+        // Pasamos por las entradas
         for (auto i : nodo->entradas)
         {
+            // Obtenemos las distancias del MBR
             int dx = i->rectangulo[0].mayor - i->rectangulo[0].menor;
             int dy = i->rectangulo[1].mayor - i->rectangulo[1].menor;
+            // Cremaos un rectangulo con las distancias
             sf::RectangleShape rectangulo(sf::Vector2f(dx, dy));
             rectangulo.setOutlineColor(sf::Color((40-color)%256, (2*color  + 10)%256, color%256));
             rectangulo.setOutlineThickness(2);
+            // Posicionamos el rectangulo de acuerdo a su posición superior izquierda
             rectangulo.setPosition(i->rectangulo[0].menor, window.getSize().y - i->rectangulo[1].mayor);
             rectangulo.setFillColor(sf::Color::Transparent);
 
             window.draw(rectangulo);
+            // llamamos a la misma funión para al nodo hijo de la entrada interna
             imprimir_arbol_r_recursivo(i->puntero_hijo, espacio, color+30);
         }
     }

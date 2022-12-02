@@ -58,6 +58,7 @@ protected:
     friend bool operator>(const Distante &pd1, const Distante &pd2);
     friend bool operator<=(const Distante &pd1, const Distante &pd2);
     friend bool operator>=(const Distante &pd1, const Distante &pd2);
+    // Actualizar nodos superiores en eliminación
     void condensar_cercano(Nodo* L);
     // Algorithm Insert
     void insercion(Entrada* R, int Nivel, bool F);
@@ -75,16 +76,25 @@ protected:
     void reinsertar(Nodo* N, int Nivel);
 
 private:
+    // FUNCION DEPRECADA
     void imprimir_cantidad_nodos();
+    // Destruir memoria dinamica
     void destruir_recursivo(Nodo* raiz);
+    // Calcular altura atributo
     void obtener_altura();
+    // Calcular el margen
     static int calcular_margen(Intervalo& I, vector<Entrada*>& vE, Entrada& et1, Entrada& et2);
+    // Calcular el solapamiento
     static pair<int, int> calcular_sobrelapamiento(Nodo *N, int indice);
+    // Nodo puntero raiz
     Nodo* raiz;
+    // altura
     int altura;
+    // cantidad de objetos
     int objetos;
 
     friend class Interfaz;
+    // DEPRECADA
     friend void verificarPadres(Arbol_R_Estrella* a);
 };
 
