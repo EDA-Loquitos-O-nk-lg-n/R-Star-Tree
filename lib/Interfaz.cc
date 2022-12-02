@@ -284,7 +284,6 @@ void Interfaz::imprimir_arbol_r(){
     imprimir_arbol_r_recursivo(arbol_r->raiz, espacio, 30);
 }
 
-// FUNCION DEPRECADA
 void Interfaz::imprimir_arbol_r_recursivo(Nodo* nodo, int &espacio, int color){
     // Si es un nodo hoja
     if(nodo->hoja){
