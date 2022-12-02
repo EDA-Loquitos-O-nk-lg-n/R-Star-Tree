@@ -54,6 +54,7 @@ public:
     // Sobrelapado de todos los niveles
     double obtener_sobrelapado_total();
 protected:
+    // COMPARAR OBEJTOS KNN
     friend bool operator<(const Distante &pd1, const Distante &pd2);
     friend bool operator>(const Distante &pd1, const Distante &pd2);
     friend bool operator<=(const Distante &pd1, const Distante &pd2);
