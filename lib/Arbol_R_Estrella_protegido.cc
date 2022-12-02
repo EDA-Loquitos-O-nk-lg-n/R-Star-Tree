@@ -206,12 +206,11 @@ int Arbol_R_Estrella::escoger_eje_division(Nodo* N){
 // Algorithm ChooseSplitIndex (k, menor/mayor)
 pair<int, bool> Arbol_R_Estrella::escoger_indice_division(Nodo* N, int eje){
     Intervalo I{1, Constante::M - 2*Constante::m + 2};
-    // indice-k, sobrelapar, area, orden por menor/mayor, 
+    // TUPLA < indice-k, sobrelapar, area, orden por menor/mayor  > 
     tuple<int, int, int, bool> criterio{0,numeric_limits<int>::max(),numeric_limits<int>::max(), false};
     function<bool(Entrada*, Entrada*)> comparadores[2];
     comparadores[0] = (eje? &comparar_rectangulo_menor_Y: &comparar_rectangulo_menor_X);
     comparadores[1] = (eje? &comparar_rectangulo_mayor_Y: &comparar_rectangulo_mayor_X);
-    // void* funcion_menor = (eje?); 
 
     vector<Entrada*> v_entradas = N->entradas;
     for(int b = 0; b<2; b++){
